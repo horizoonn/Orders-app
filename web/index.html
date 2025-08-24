@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск Заказа</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        .order-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            background: #fff;
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-size: 1.2em;
+            color: #007bff;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .field {
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+        .field strong {
+            color: #555;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            border: 1px solid #eee;
+        }
+        .error {
+            color: red;
+            text-align: center;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Поиск информации о заказе</h1>
+        <p>Введите уникальный идентификатор заказа (order_uid) и нажмите "Найти". Данные берутся из кэша или БД.</p>
+        
+        <form id="searchForm">
+            <input type="text" id="order_uid" placeholder="Введите order_uid" required>
+            <button type="submit">Найти</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const uid = document.getElementById('order_uid').value;
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p class="loading">Загрузка...</p>';
+            
+            try {
+                const response = await fetch(`/order/${uid}`);
+                if (!response.ok) {
+                    throw new Error(`Ошибка: ${response.status} (Возможно, заказ не найден)`);
+                }
+                const data = await response.json();
+                
+                // Отображаем все данные в красивом виде
+                let itemsHtml = data.items.map(item => `
+                    <li>
+                        <div class="field"><strong>Название:</strong> ${item.name}</div>
+                        <div class="field"><strong>Цена:</strong> ${item.price}</div>
+                        <div class="field"><strong>Итоговая цена:</strong> ${item.total_price}</div>
+                        <div class="field"><strong>Скидка:</strong> ${item.sale}%</div>
+                        <div class="field"><strong>Размер:</strong> ${item.size}</div>
+                        <div class="field"><strong>Бренд:</strong> ${item.brand}</div>
+                        <div class="field"><strong>Статус:</strong> ${item.status}</div>
+                        <div class="field"><strong>Chrt ID:</strong> ${item.chrt_id}</div>
+                        <div class="field"><strong>Track Number:</strong> ${item.track_number}</div>
+                        <div class="field"><strong>RID:</strong> ${item.rid}</div>
+                        <div class="field"><strong>NM ID:</strong> ${item.nm_id}</div>
+                    </li>
+                `).join('');
+                
+                resultDiv.innerHTML = `
+                    <div class="order-card">
+                        <div class="section-title">Основная информация</div>
+                        <div class="field"><strong>Order UID:</strong> ${data.order_uid}</div>
+                        <div class="field"><strong>Track Number:</strong> ${data.track_number}</div>
+                        <div class="field"><strong>Entry:</strong> ${data.entry}</div>
+                        <div class="field"><strong>Locale:</strong> ${data.locale}</div>
+                        <div class="field"><strong>Internal Signature:</strong> ${data.internal_signature || 'N/A'}</div>
+                        <div class="field"><strong>Customer ID:</strong> ${data.customer_id}</div>
+                        <div class="field"><strong>Delivery Service:</strong> ${data.delivery_service}</div>
+                        <div class="field"><strong>Shard Key:</strong> ${data.shardkey || data.shard_key}</div>
+                        <div class="field"><strong>SM ID:</strong> ${data.sm_id}</div>
+                        <div class="field"><strong>Date Created:</strong> ${data.date_created}</div>
+                        <div class="field"><strong>Oof Shard:</strong> ${data.oof_shard}</div>
+                    </div>
+                    <div class="order-card">
+                        <div class="section-title">Доставка</div>
+                        <div class="field"><strong>Имя:</strong> ${data.delivery.name}</div>
+                        <div class="field"><strong>Телефон:</strong> ${data.delivery.phone}</div>
+                        <div class="field"><strong>ZIP:</strong> ${data.delivery.zip}</div>
+                        <div class="field"><strong>Город:</strong> ${data.delivery.city}</div>
+                        <div class="field"><strong>Адрес:</strong> ${data.delivery.address}</div>
+                        <div class="field"><strong>Регион:</strong> ${data.delivery.region}</div>
+                        <div class="field"><strong>Email:</strong> ${data.delivery.email}</div>
+                    </div>
+                    <div class="order-card">
+                        <div class="section-title">Оплата</div>
+                        <div class="field"><strong>Transaction:</strong> ${data.payment.transaction}</div>
+                        <div class="field"><strong>Request ID:</strong> ${data.payment.request_id || 'N/A'}</div>
+                        <div class="field"><strong>Валюта:</strong> ${data.payment.currency}</div>
+                        <div class="field"><strong>Провайдер:</strong> ${data.payment.provider}</div>
+                        <div class="field"><strong>Сумма:</strong> ${data.payment.amount}</div>
+                        <div class="field"><strong>Дата платежа:</strong> ${data.payment.payment_dt}</div>
+                        <div class="field"><strong>Банк:</strong> ${data.payment.bank}</div>
+                        <div class="field"><strong>Стоимость доставки:</strong> ${data.payment.delivery_cost}</div>
+                        <div class="field"><strong>Сумма товаров:</strong> ${data.payment.goods_total}</div>
+                        <div class="field"><strong>Custom Fee:</strong> ${data.payment.custom_fee}</div>
+                    </div>
+                    <div class="order-card">
+                        <div class="section-title">Товары</div>
+                        <ul>${itemsHtml}</ul>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">Ошибка: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
