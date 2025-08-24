@@ -149,7 +149,8 @@ APP_PORT=8082
 - Go 1.21+ 
 - Docker & Docker Compose 
 - PostgreSQL 15 (автоматически поднимается через compose) 
-- Kafka 7.4.0 (через compose) #
+- Kafka 7.4.0 (через compose)
+
 
 
 
