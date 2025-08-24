@@ -72,15 +72,12 @@ MYAPP/
 # 1. Запуск инфраструктуры (Поднимает PostgreSQL, Zookeeper, Kafka, Order Service.)
 make docker-up
 
-# 2. Отправка тестовых заказов(Отправит тестовый заказ с `order_uid: b563feb7b2b84b6test` в Kafka.)
-make test-kafka
+# 2. Проверка работы - Перейдите в браузере: [http://localhost:8082](http://localhost:8082) - Введите `order_uid` и получите данные заказа. 
 
-# 3. Проверка работы - Перейдите в браузере: [http://localhost:8082](http://localhost:8082) - Введите `order_uid` и получите данные заказа. 
-
-# 4. Остановка сервисов
+# 3. Остановка сервисов
 make docker-down
 
-# 5. Просмотр доступных команд
+# 4. Просмотр доступных команд
 make help
 
 ```
@@ -153,6 +150,7 @@ APP_PORT=8082
 - Docker & Docker Compose 
 - PostgreSQL 15 (автоматически поднимается через compose) 
 - Kafka 7.4.0 (через compose) #
+
 
 
 
