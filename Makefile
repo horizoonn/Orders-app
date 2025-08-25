@@ -36,7 +36,7 @@ docker-up:
 	@echo " Services started:"
 	@echo "   Web: http://localhost:8082"
 	@echo "   DB: localhost:5433"
-	@echo "   Kafka: localhost:9093"
+	@echo "   Kafka-UI: http://localhost:8080"
 
 # Остановка всех сервисов
 docker-down:
